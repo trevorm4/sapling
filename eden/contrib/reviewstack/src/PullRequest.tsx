@@ -26,7 +26,7 @@ import {
 } from './recoil';
 import {stripStackInfoFromSaplingBodyHTML} from './saplingStack';
 import {stackedPullRequest} from './stackState';
-import {Box, Text} from '@primer/react';
+import {Box, ProgressBar, Text} from '@primer/react';
 import {Suspense, useEffect} from 'react';
 import {
   useRecoilValue,
@@ -98,7 +98,9 @@ function PullRequestNotFound() {
 
 function PullRequestDetails() {
   const pullRequest = useRecoilValue(gitHubPullRequest);
+  console.log(pullRequest);
   const pullRequestStack = useRecoilValueLoadable(stackedPullRequest);
+  console.log(pullRequestStack);
   if (pullRequest == null || pullRequestStack.state !== 'hasValue') {
     return null;
   }
@@ -133,6 +135,7 @@ function PullRequestDetails() {
       </Box>
       <PullRequestSignals />
       <Suspense fallback={<CenteredSpinner />}>
+      <ProgressBar progress={50} barSize='small' bg="danger.emphasis"/>
         <PullRequestVersionDiff />
       </Suspense>
     </Box>
@@ -147,6 +150,8 @@ function PullRequestVersionDiff() {
     return (
       <Suspense
         fallback={<CenteredSpinner message={'Loading ' + diff.diff.length + ' changes...'} />}>
+        <div className="line-count">
+        </div>
         <DiffView diff={diff.diff} isPullRequest={true} />
       </Suspense>
     );
