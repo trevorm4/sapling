@@ -170,7 +170,7 @@ def clone(ui, url, destpath=None, update=True, pullnames=None, submodule=None):
             ret = initgitbare(ui, repo.svfs.join("git"))
             if ret != 0:
                 raise error.Abort(_("git clone was not successful"))
-            repo = initgit(repo, "git", url)
+            repo = initgit(repo, "git")
             if url:
                 if pullnames is None:
                     ls_remote_args = ["ls-remote", "--symref", url, "HEAD"]
@@ -288,7 +288,7 @@ def parse_symref_head(symref_head_output: str) -> Optional[str]:
     return None
 
 
-def initgit(repo, gitdir, giturl=None):
+def initgit(repo, gitdir):
     """Change a repo to be backed by a bare git repo in `gitdir`.
     This should only be called for newly created repos.
     """
@@ -300,8 +300,6 @@ def initgit(repo, gitdir, giturl=None):
         repo.storerequirements.add(GIT_STORE_REQUIREMENT)
         repo._writestorerequirements()
     # recreate the repo to pick up key changes
-    from . import hg
-
     repo = setup_repository(repo.baseui, repo.root).local()
     visibility.add(repo, repo.changelog.dageval(lambda: heads(all())))
     return repo
@@ -764,24 +762,30 @@ def pullrefspecs(repo, url, refspecs):
     return ret
 
 
-def push(repo, dest, pushnode, to, force=False):
+def push(repo, dest, pushnode_to_pairs, force=False):
     """Push "pushnode" to remote "dest" bookmark "to"
+
+    `pushnode_to_pairs` is a list of `(pushnode, to)` pairs.
 
     If force is True, enable non-fast-forward moves.
     If pushnode is None, delete the remote bookmark.
     """
-    if pushnode is None:
-        fromspec = ""
-    elif force:
-        fromspec = "+%s" % hex(pushnode)
-    else:
-        fromspec = "%s" % hex(pushnode)
-
     url, remote = urlremote(repo.ui, dest)
-    refname = RefName(name=to)
-    refspec = "%s:%s" % (fromspec, refname)
+    refspecs = []
+    for pushnode, to in pushnode_to_pairs:
+        if pushnode is None:
+            fromspec = ""
+        elif force:
+            fromspec = "+%s" % hex(pushnode)
+        else:
+            fromspec = "%s" % hex(pushnode)
+        refname = RefName(name=to)
+        refspec = "%s:%s" % (fromspec, refname)
+        refspecs.append(refspec)
+    if not refspecs:
+        return 0
     with repo.lock(), repo.transaction("push"):
-        ret = rungit(repo, ["push", url, refspec])
+        ret = rungit(repo, ["push", url, *refspecs])
         # update remotenames
         if ret == 0:
             name = refname.withremote(remote).remotename

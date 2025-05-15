@@ -558,6 +558,20 @@ class EdenConfig : private ConfigSettingManager {
       false,
       this};
 
+  ConfigSetting<bool> warmTreeAuxCacheIfTreeFromLocalStore{
+      "store:warm-aux-cache-tree-local-store",
+      false,
+      this};
+
+  ConfigSetting<bool> warmTreeAuxLocalCacheIfTreeFromBackingStore{
+      "store:warm-aux-local-cache-tree-backing-store",
+      false,
+      this};
+
+  ConfigSetting<bool> warmTreeAuxMemCacheIfTreeFromBackingStore{
+      "store:warm-aux-mem-cache-tree-backing-store",
+      false,
+      this};
   // [fuse]
 
   /**
@@ -1592,6 +1606,15 @@ class EdenConfig : private ConfigSettingManager {
   ConfigSetting<bool> notifyHealthReportIssues{
       "notifications:notify-health-report-issues",
       false,
+      this};
+
+  /**
+   * The age threshold that the health-report command should utilize to check if
+   * the running EdenFS version is stale.
+   */
+  ConfigSetting<size_t> healthReportStaleVersionThresholdDays{
+      "notifications:health-report-stale-version-threshold-days",
+      30,
       this};
 
   /**

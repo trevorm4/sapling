@@ -333,6 +333,10 @@ class ObjectStore : public IObjectStore,
    */
   bool areObjectsKnownIdentical(const ObjectId& one, const ObjectId& two) const;
 
+  void workingCopyParentHint(const RootId& parent) {
+    backingStore_->workingCopyParentHint(parent);
+  }
+
   folly::Synchronized<std::unordered_map<ProcessId, uint64_t>>&
   getPidFetches() {
     return pidFetchCounts_->map_;
@@ -391,6 +395,10 @@ class ObjectStore : public IObjectStore,
       folly::stop_watch<std::chrono::milliseconds> watch) const;
 
   void maybeCacheTreeAndAuxInLocalStore(
+      const ObjectId& id,
+      const BackingStore::GetTreeResult& treeResult) const;
+  void maybeCacheTreeAuxInMemCache(
+      const ObjectId& id,
       const BackingStore::GetTreeResult& treeResult) const;
 
   folly::SemiFuture<BackingStore::GetTreeAuxResult> getTreeAuxDataImpl(
