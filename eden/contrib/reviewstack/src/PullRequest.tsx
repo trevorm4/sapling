@@ -26,7 +26,7 @@ import {
 } from './recoil';
 import {stripStackInfoFromSaplingBodyHTML} from './saplingStack';
 import {stackedPullRequest} from './stackState';
-import {Box, Text} from '@primer/react';
+import {Box, CounterLabel, Text} from '@primer/react';
 import {Suspense, useEffect} from 'react';
 import {
   useRecoilValue,
@@ -124,7 +124,7 @@ function PullRequestDetails() {
       <PullRequestLabels />
       <Box
         borderWidth={1}
-        borderStyle="solid"
+        borderStyle="solid" 
         borderColor="accent.muted"
         borderRadius={4}
         fontSize={14}
@@ -133,9 +133,23 @@ function PullRequestDetails() {
       </Box>
       <PullRequestSignals />
       <Suspense fallback={<CenteredSpinner />}>
+      <div>
+      <div 
+      style={{ 
+        display: "flex", 
+        flexDirection: "row", 
+        gap: ".5rem",
+        paddingBottom: ".5rem"
+      }} 
+    >
+        <CounterLabel sx={{ backgroundColor: "success.muted"}}>+{pullRequest.additions}</CounterLabel>
+        <CounterLabel scheme="primary" sx={{ backgroundColor: "danger.muted", color: "black"}}>-{pullRequest.deletions}</CounterLabel>
+    </div>
         <PullRequestVersionDiff />
+        </div>
       </Suspense>
     </Box>
+    
   );
 }
 
@@ -147,6 +161,8 @@ function PullRequestVersionDiff() {
     return (
       <Suspense
         fallback={<CenteredSpinner message={'Loading ' + diff.diff.length + ' changes...'} />}>
+        <div className="line-count">
+        </div>
         <DiffView diff={diff.diff} isPullRequest={true} />
       </Suspense>
     );
